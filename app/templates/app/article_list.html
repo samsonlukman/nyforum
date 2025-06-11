@@ -1,0 +1,70 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}Blog - Nigerian Youth Forum{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16">
+        <h1 class="text-5xl font-extrabold text-primary-green text-center mb-12">Our Insights & News</h1>
+
+        <!-- Search and Filter Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-center bg-white rounded-xl shadow-lg p-6 mb-12">
+            <form method="get" action="{% url 'article_list' %}" class="w-full flex flex-col md:flex-row items-center justify-between gap-4">
+                <input type="text" name="q" placeholder="Search articles..." class="flex-grow px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green transition-colors text-lg" value="{{ current_query|default:'' }}">
+                
+                <select name="category" class="px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green bg-white text-dark-text">
+                    <option value="all">All Categories</option>
+                    {% for value, label in categories %}
+                        <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                
+                {# Tags filter can be a text input for comma-separated tags or another select if tags are pre-defined #}
+                <input type="text" name="tag" placeholder="Filter by tag..." class="px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green transition-colors text-lg" value="{{ current_tag|default:'' }}">
+                
+                <select name="sort" class="px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green bg-white text-dark-text">
+                    <option value="latest">Latest</option>
+                    <option value="oldest">Oldest</option>
+                </select>
+                <button type="submit" class="bg-primary-green text-white px-6 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium">Apply Filters</button>
+            </form>
+        </div>
+
+        <!-- Article Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for article in articles %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                {% if article.featured_image %}
+                    <img src="{{ article.featured_image.url }}" alt="{{ article.title }} Thumbnail" class="w-full h-48 object-cover">
+                {% else %}
+                    <img src="https://placehold.co/600x400/008000/FFFFFF?text={{ article.title|truncatechars:15 }}" alt="Placeholder" class="w-full h-48 object-cover">
+                {% endif %}
+                <div class="p-6">
+                    <a href="{% url 'article_detail' article_id=article.id %}">
+                    <h3 class="text-xl font-bold text-dark-text mb-2">{{ article.title }}</h3>
+                    <p class="text-gray-600 text-sm mb-4">
+                        By {{ article.author.get_full_name|default:article.author.username }} | {{ article.published_at|date:"M d, Y" }} | 
+                        <span class="bg-primary-green text-white text-xs px-2 py-1 rounded-full">{{ article.get_category_display }}</span>
+                    </p>
+                    <p class="text-gray-700 leading-relaxed mb-4">{{ article.content|truncatechars:100 }}</p>
+                    <span class="text-secondary-green font-semibold hover:underline">Read More</span>
+
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="col-span-full text-center text-gray-600">No articles found matching your criteria.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination Placeholder -->
+        <div class="flex justify-center space-x-2 mt-12">
+            {# Implement actual pagination here if using Django's Paginator #}
+            <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">Previous</button>
+            <button class="px-4 py-2 bg-primary-green text-white rounded-lg">1</button>
+            <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">2</button>
+            <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">3</button>
+            <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">Next</button>
+        </div>
+    </div>
+{% endblock %}
+

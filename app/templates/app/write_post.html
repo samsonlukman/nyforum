@@ -1,0 +1,192 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}Write a Post - Nigerian Youth Forum{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16 max-w-4xl">
+        <h1 class="text-5xl font-extrabold text-primary-green text-center mb-12">Create New Article / Forum Post</h1>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 md:p-12">
+            <form method="post" action="{% url 'write_post' %}" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Select Post Type:</label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="post_type" value="article" class="form-radio text-primary-green h-5 w-5 post-type-radio" checked>
+                            <span class="ml-2 text-lg text-gray-800">Article</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="post_type" value="forum_thread" class="form-radio text-primary-green h-5 w-5 post-type-radio">
+                            <span class="ml-2 text-lg text-gray-800">Forum Thread</span>
+                        </label>
+                    </div>
+                </div>
+
+                {# Article Form Fields #}
+                <div id="article-fields" class="space-y-6">
+                    <div>
+                        <label for="{{ article_form.title.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ article_form.title.label }}</label>
+                        {{ article_form.title }}
+                        {% for error in article_form.title.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="{{ article_form.category.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ article_form.category.label }}</label>
+                        {{ article_form.category }}
+                        {% for error in article_form.category.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="{{ article_form.tags.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ article_form.tags.label }}</label>
+                        {{ article_form.tags }}
+                        {% if article_form.tags.help_text %}
+                            <p class="text-sm text-gray-500 mt-1">{{ article_form.tags.help_text }}</p>
+                        {% endif %}
+                        {% for error in article_form.tags.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="{{ article_form.content.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ article_form.content.label }}</label>
+                        {{ article_form.content }}
+                        {% for error in article_form.content.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                        <p class="text-sm text-gray-500 mt-2">Supports Markdown/HTML for formatting.</p>
+                    </div>
+                    <div>
+                        <label for="{{ article_form.featured_image.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ article_form.featured_image.label }} (Optional)</label>
+                        {{ article_form.featured_image }}
+                        {% for error in article_form.featured_image.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% if user.is_staff %} {# Only show for staff/admin #}
+                        <div class="flex items-center">
+                            {{ article_form.is_published }}
+                            <label for="{{ article_form.is_published.id_for_label }}" class="ml-2 text-gray-700">{{ article_form.is_published.label }}</label>
+                            {% for error in article_form.is_published.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Forum Thread Form Fields #}
+                <div id="forum-thread-fields" class="space-y-6 hidden">
+                    <div>
+                        <label for="{{ forum_thread_form.title.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ forum_thread_form.title.label }}</label>
+                        {{ forum_thread_form.title }}
+                        {% for error in forum_thread_form.title.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="{{ forum_thread_form.category.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ forum_thread_form.category.label }}</label>
+                        {{ forum_thread_form.category }}
+                        {% for error in forum_thread_form.category.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="{{ forum_thread_form.content.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ forum_thread_form.content.label }}</label>
+                        {{ forum_thread_form.content }}
+                        {% for error in forum_thread_form.content.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="{{ forum_thread_form.image.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ forum_thread_form.image.label }} (Optional)</label>
+                        {{ forum_thread_form.image }}
+                        {% for error in forum_thread_form.image.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %} {# Display form-wide errors if any from initial form submission #}
+                    <div class="text-red-500 text-sm mt-1">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mt-8">
+                   
+                    <button type="submit" class="flex-1 bg-primary-green text-white py-3 rounded-full hover:bg-secondary-green transition-colors font-bold shadow-md">
+                        <i class="fas fa-paper-plane mr-2"></i> Submit for Review / Post
+                    </button>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-4">Articles will be reviewed by moderators before being published. Forum posts are usually live immediately.</p>
+            </form>
+        </div>
+    </div>
+
+    <div id="reviewModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Article Submitted</h2>
+            <p class="text-gray-700 mb-6">Your article has been submitted for review by our moderators. You will be notified once it's approved.</p>
+            <a href="{% url 'article_list' %}" class="inline-block bg-primary-green hover:bg-secondary-green text-white font-semibold py-2 px-4 rounded-full transition">
+                Go to Blog
+            </a>
+        </div>
+    </div>
+    
+{% endblock %}
+
+{% block extra_js %}
+{% if show_review_modal %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('reviewModal').classList.remove('hidden');
+    });
+</script>
+{% endif %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const articleFields = document.getElementById('article-fields');
+        const forumThreadFields = document.getElementById('forum-thread-fields');
+        const postTypeRadios = document.querySelectorAll('.post-type-radio');
+
+        // Disable or enable all inputs inside a given container
+        function setFormFieldsState(container, enabled) {
+            container.querySelectorAll('input, textarea, select').forEach(el => {
+                if (enabled) {
+                    el.removeAttribute('disabled');
+                } else {
+                    el.setAttribute('disabled', 'disabled');
+                }
+            });
+        }
+
+        function togglePostTypeFields() {
+            const selectedType = document.querySelector('input[name="post_type"]:checked').value;
+
+            if (selectedType === 'article') {
+                articleFields.classList.remove('hidden');
+                forumThreadFields.classList.add('hidden');
+                setFormFieldsState(articleFields, true);
+                setFormFieldsState(forumThreadFields, false);
+            } else {
+                articleFields.classList.add('hidden');
+                forumThreadFields.classList.remove('hidden');
+                setFormFieldsState(articleFields, false);
+                setFormFieldsState(forumThreadFields, true);
+            }
+        }
+
+        // Attach event listeners
+        postTypeRadios.forEach(radio => {
+            radio.addEventListener('change', togglePostTypeFields);
+        });
+
+        // Initial toggle
+        togglePostTypeFields();
+    });
+</script>
+{% endblock %}
+

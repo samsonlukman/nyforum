@@ -1,0 +1,177 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}{{ thread.title }} - Forum{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-8 md:p-12 mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-dark-text mb-4 leading-tight">{{ thread.title }}</h1>
+            <p class="text-lg text-gray-600 mb-6">
+                Posted by <span class="font-semibold">{{ thread.author.get_full_name|default:thread.author.username }}</span> on {{ thread.created_at|date:"M d, Y" }}
+                <span class="bg-primary-green text-white text-xs px-2 py-1 rounded-full ml-4">{{ thread.get_category_display }}</span>
+            </p>
+
+            {% if thread.image %}
+                <img src="{{ thread.image.url }}" alt="{{ thread.title }} Image" class="w-full h-auto rounded-lg mb-8 object-cover max-h-96">
+            {% endif %}
+
+            <div class="prose max-w-none text-gray-800 leading-relaxed text-lg mb-8">
+                {{ thread.content|linebreaksbr }} {# Renders line breaks as <br> tags #}
+            </div>
+
+            <div class="flex items-center space-x-4 mb-8">
+                {# Placeholder for general thread likes, if implemented #}
+                <button class="text-primary-green hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-facebook"></i></button>
+                <button class="text-primary-green hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-twitter"></i></button>
+                <button class="text-primary-green hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-whatsapp"></i></button>
+            </div>
+        </div>
+
+        <!-- Replies Section -->
+        <div class="mt-8">
+            <h2 class="text-3xl font-bold text-primary-green mb-6">Replies ({{ replies.count }})</h2>
+            
+            <!-- Main Reply Form -->
+            {% if user.is_authenticated %}
+            <div id="main-reply-form-container" class="bg-off-white p-6 rounded-lg mb-8 shadow-sm">
+                <h3 id="reply-form-heading" class="text-xl font-semibold text-dark-text mb-4">Post a Reply</h3>
+                <form id="reply-form" method="post" action="{% url 'forum_detail' thread_id=thread.id %}">
+                    {% csrf_token %}
+                    {{ reply_form.content }}
+                    {{ reply_form.parent_reply }} {# Hidden input for parent reply ID #}
+                    <input type="hidden" name="submit_reply" value="true"> {# Indicator for view #}
+                    <button type="submit" class="mt-4 bg-primary-green text-white px-6 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium">Submit Reply</button>
+                    <button type="button" id="cancel-reply" class="hidden ml-2 bg-gray-400 text-white px-6 py-3 rounded-full hover:bg-gray-500 transition-colors font-medium">Cancel Reply</button>
+                </form>
+                {% if reply_form.errors %}
+                    <ul class="text-red-500 text-sm mt-2">
+                        {% for field, errors in reply_form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="text-center text-gray-600 mb-8">Please <a href="{% url 'login' %}" class="text-secondary-green hover:underline">login</a> to post a reply.</p>
+            {% endif %}
+
+            <!-- Individual Replies (Rendered recursively for nesting) -->
+            <div class="space-y-6">
+                {% comment %}
+                    To properly render nested replies, you'd typically implement a recursive template include
+                    or pre-process replies in the view to build a hierarchical structure.
+                    For a simple visual indentation for one level of reply-to-reply,
+                    we can check `reply.parent_reply`.
+                {% endcomment %}
+                {% for reply in replies %}
+                    {% if not reply.parent_reply %} {# Only render top-level replies here #}
+                        {% include 'app/reply_card.html' with reply=reply %}
+                        {% for child_reply in replies %}
+                            {% if child_reply.parent_reply and child_reply.parent_reply.id == reply.id %}
+                                {# This creates a single level of nesting. For deeper nesting, you'd need a recursive loop or a custom tag. #}
+                                {% include 'app/reply_card.html' with reply=child_reply is_child=True %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                {% if not replies %}
+                    <p class="text-center text-gray-600">No replies yet. Be the first to reply!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const replyForm = document.getElementById('reply-form');
+        const parentReplyInput = replyForm.querySelector('input[name="parent_reply"]');
+        const replyFormHeading = document.getElementById('reply-form-heading');
+        const mainReplyContent = replyForm.querySelector('textarea[name="content"]');
+        const cancelReplyButton = document.getElementById('cancel-reply');
+
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // --- Like/Unlike functionality ---
+        document.querySelectorAll('.like-button').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const replyId = button.dataset.replyId;
+                const url = `{% url 'like_reply' reply_id=0 %}`.replace('0', replyId);
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    button.querySelector('.like-count').textContent = data.like_count;
+                    if (data.liked) {
+                        button.classList.add('text-red-500');
+                        button.classList.remove('text-gray-500');
+                    } else {
+                        button.classList.remove('text-red-500');
+                        button.classList.add('text-gray-500');
+                    }
+                    console.log(data.message);
+                } catch (error) {
+                    console.error('Error liking/unliking reply:', error);
+                    // Use a custom modal instead of alert in production
+                    alert('Could not process your like/unlike request. Please try again.');
+                }
+            });
+        });
+
+        // --- Reply to Reply functionality ---
+        document.querySelectorAll('.reply-to-button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const parentReplyId = button.dataset.replyId;
+                const parentAuthorUsername = button.dataset.authorUsername;
+
+                parentReplyInput.value = parentReplyId; // Set the hidden parent_reply input
+                replyFormHeading.textContent = `Replying to @${parentAuthorUsername}`; // Update heading
+                mainReplyContent.focus(); // Focus on the textarea
+                cancelReplyButton.classList.remove('hidden'); // Show cancel button
+
+                // Optionally scroll to the reply form
+                replyForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        cancelReplyButton.addEventListener('click', () => {
+            parentReplyInput.value = ''; // Clear the parent reply ID
+            replyFormHeading.textContent = 'Post a Reply'; // Reset heading
+            mainReplyContent.value = ''; // Clear textarea
+            cancelReplyButton.classList.add('hidden'); // Hide cancel button
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}{{ profile_owner.username }}'s Profile - Nigerian Youth Forum{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16">
+        <h1 class="text-5xl font-extrabold text-primary-green text-center mb-12">My Profile</h1>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Sidebar - Profile Navigation -->
+            <aside class="w-full lg:w-1/4 bg-white rounded-xl shadow-lg p-6 lg:sticky lg:top-24 h-fit">
+                <nav class="space-y-3">
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-dark-text bg-gray-100" onclick="showProfileTab('my-profile')">
+                        <i class="fas fa-user-circle mr-3"></i> My Profile
+                    </a>
+                    {% if user.is_authenticated %}
+                <a href="{% url 'write_post' %}" class="w-full bg-primary-green text-white py-3 rounded-full hover:bg-secondary-green transition-colors font-medium flex items-center justify-center">
+                    <i class="fas fa-plus-circle mr-2"></i> New Post
+                </a>
+                {% else %}
+                <p class="text-center text-sm text-gray-600 mt-4">Login to create new posts.</p>
+                {% endif %}
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-posts')">
+                        <i class="fas fa-file-alt mr-3"></i> My Articles
+                    </a>
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-threads')">
+                        <i class="fas fa-comments mr-3"></i> My Forum Threads
+                    </a>
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-comments')">
+                        <i class="fas fa-comment-dots mr-3"></i> My Comments
+                    </a>
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-replies')">
+                        <i class="fas fa-reply-all mr-3"></i> My Replies
+                    </a>
+                    {% if is_owner %}
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('account-settings')">
+                        <i class="fas fa-cog mr-3"></i> Account Settings
+                    </a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="w-full text-red-500 hover:text-red-700 py-3 rounded-lg text-lg font-medium mt-4 block text-center">
+                            <i class="fas fa-sign-out-alt mr-3"></i> Logout
+                        </a>
+                    {% endif %}
+                </nav>
+            </aside>
+
+            <!-- Main Content - Profile Sections -->
+            <div class="w-full lg:w-3/4 bg-white rounded-xl shadow-lg p-8 md:p-12">
+                <!-- My Profile Tab -->
+                <div id="tab-my-profile" class="profile-tab-content">
+                    <h2 class="text-3xl font-bold text-primary-green mb-8">My Profile</h2>
+                    <div class="flex flex-col md:flex-row items-center md:space-x-8 mb-8">
+                        {% if profile_owner.profile_pics %}
+                            <img src="{{ profile_owner.profile_pics.url }}" alt="Profile Picture" class="w-32 h-32 rounded-full object-cover border-4 border-secondary-green mb-6 md:mb-0">
+                        {% else %}
+                            <div class="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-5xl font-bold mb-6 md:mb-0">{{ profile_owner.username|slice:":1"|upper }}</div>
+                        {% endif %}
+                        <div>
+                            <p class="text-2xl font-bold text-dark-text mb-2">Username: <span class="font-semibold">{{ profile_owner.username }}</span></p>
+                            <p class="text-lg text-gray-700 mb-2">Full Name: <span class="font-semibold">{{ profile_owner.get_full_name }}</span></p>
+                            <p class="text-lg text-gray-700 mb-2">Email: {{ profile_owner.email }}</p>
+                            {% if profile_owner.phone_number %}
+                            <p class="text-lg text-gray-700 mb-2">Phone: {{ profile_owner.phone_number }}</p>
+                            {% endif %}
+                            <p class="text-lg text-gray-700">Joined: {{ profile_owner.date_joined|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-2xl font-semibold text-dark-text mb-4">Bio</h3>
+                    <p class="text-gray-700 leading-relaxed mb-6">
+                        {{ profile_owner.bio|default:"No bio available. Click 'Edit Profile' to add one." }}
+                    </p>
+                    
+                    <h3 class="text-2xl font-semibold text-dark-text mb-4">Badges & Achievements</h3>
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <span class="bg-green-100 text-primary-green text-sm px-4 py-2 rounded-full font-semibold"><i class="fas fa-star mr-2"></i>Active Contributor</span>
+                        <span class="bg-green-100 text-primary-green text-sm px-4 py-2 rounded-full font-semibold"><i class="fas fa-trophy mr-2"></i>Forum Veteran</span>
+                    </div>
+
+                    {% if is_owner %}
+                    <button class="bg-primary-green text-white px-8 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium shadow-md" onclick="showProfileTab('account-settings')">
+                        <i class="fas fa-edit mr-2"></i> Edit Profile
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- My Articles Tab -->
+                <div id="tab-my-posts" class="profile-tab-content hidden">
+                    <h2 class="text-3xl font-bold text-primary-green mb-8">My Articles</h2>
+                    <div class="space-y-6">
+                        {% for article in user_articles %}
+                        <div class="bg-off-white p-6 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                            <div>
+                                <h3 class="text-xl font-bold text-dark-text mb-1">{{ article.title }}</h3>
+                                <p class="text-gray-600 text-sm">
+                                    Published: {{ article.published_at|date:"M d, Y"|default:"Not yet published" }} |
+                                    Category: {{ article.get_category_display }}
+                                    {% if not article.is_published %}<span class="text-red-500 ml-2">(Draft/Under Review)</span>{% endif %}
+                                </p>
+                            </div>
+                            <div class="mt-4 sm:mt-0 space-x-3">
+                                <a href="{% url 'article_detail' article_id=article.id %}" class="bg-secondary-green text-white px-4 py-2 rounded-full text-sm hover:bg-primary-green transition-colors"><i class="fas fa-eye mr-1"></i> View</a>
+                                {% if is_owner %}
+                                <a href="{% url 'write_post' %}?article_id={{ article.id }}" class="bg-gray-200 text-dark-text px-4 py-2 rounded-full text-sm hover:bg-gray-300 transition-colors"><i class="fas fa-edit mr-1"></i> Edit</a>
+                                <button class="bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm hover:bg-red-200 transition-colors"><i class="fas fa-trash-alt mr-1"></i> Delete</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-center text-gray-600">No articles posted yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- My Forum Threads Tab -->
+                <div id="tab-my-threads" class="profile-tab-content hidden">
+                    <h2 class="text-3xl font-bold text-primary-green mb-8">My Forum Threads</h2>
+                    <div class="space-y-6">
+                        {% for thread in user_forum_threads %}
+                        <div class="bg-off-white p-6 rounded-lg shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                            <div>
+                                <h3 class="text-xl font-bold text-dark-text mb-1">{{ thread.title }}</h3>
+                                <p class="text-gray-600 text-sm">
+                                    Created: {{ thread.created_at|date:"M d, Y" }} |
+                                    Category: {{ thread.get_category_display }}
+                                </p>
+                            </div>
+                            <div class="mt-4 sm:mt-0 space-x-3">
+                                <a href="{% url 'forum_detail' thread_id=thread.id %}" class="bg-secondary-green text-white px-4 py-2 rounded-full text-sm hover:bg-primary-green transition-colors"><i class="fas fa-eye mr-1"></i> View</a>
+                                {% if is_owner %}
+                                <a href="{% url 'write_post' %}?thread_id={{ thread.id }}" class="bg-gray-200 text-dark-text px-4 py-2 rounded-full text-sm hover:bg-gray-300 transition-colors"><i class="fas fa-edit mr-1"></i> Edit</a>
+                                <button class="bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm hover:bg-red-200 transition-colors"><i class="fas fa-trash-alt mr-1"></i> Delete</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-center text-gray-600">No forum threads started yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- My Article Comments Tab -->
+                <div id="tab-my-comments" class="profile-tab-content hidden">
+                    <h2 class="text-3xl font-bold text-primary-green mb-8">My Article Comments</h2>
+                    <div class="space-y-6">
+                        {% for comment in user_article_comments %}
+                        <div class="bg-off-white p-6 rounded-lg shadow-sm">
+                            <p class="text-gray-600 text-sm mb-2">On Article: <a href="{% url 'article_detail' article_id=comment.article.id %}" class="text-primary-green hover:underline">{{ comment.article.title }}</a></p>
+                            <p class="text-dark-text leading-relaxed">"{{ comment.content|truncatechars:150 }}"</p>
+                            <p class="text-gray-500 text-sm mt-3">Commented on: {{ comment.created_at|date:"M d, Y" }}</p>
+                            {% if not comment.is_approved %}<span class="text-yellow-500 text-sm"> (Under Review)</span>{% endif %}
+                        </div>
+                        {% empty %}
+                        <p class="text-center text-gray-600">No article comments yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- My Thread Replies Tab -->
+                <div id="tab-my-replies" class="profile-tab-content hidden">
+                    <h2 class="text-3xl font-bold text-primary-green mb-8">My Forum Replies</h2>
+                    <div class="space-y-6">
+                        {% for reply in user_thread_replies %}
+                        <div class="bg-off-white p-6 rounded-lg shadow-sm">
+                            <p class="text-gray-600 text-sm mb-2">On Thread: <a href="{% url 'forum_detail' thread_id=reply.thread.id %}" class="text-primary-green hover:underline">{{ reply.thread.title }}</a></p>
+                            <p class="text-dark-text leading-relaxed">"{{ reply.content|truncatechars:150 }}"</p>
+                            <p class="text-gray-500 text-sm mt-3">Replied on: {{ reply.created_at|date:"M d, Y" }}</p>
+                        </div>
+                        {% empty %}
+                        <p class="text-center text-gray-600">No forum replies yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Account Settings Tab -->
+                {% if is_owner %}
+                <div id="tab-account-settings" class="profile-tab-content hidden">
+                    <h2 class="text-3xl font-bold text-primary-green mb-8">Account Settings</h2>
+                    <form method="post" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+                        {% for field in edit_profile_form %}
+                            <div>
+                                <label for="{{ field.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        {% if edit_profile_form.non_field_errors %}
+                            <div class="text-red-500 text-sm mt-1">
+                                {% for error in edit_profile_form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mt-8">
+                            <button type="submit" class="flex-1 bg-primary-green text-white py-3 rounded-full hover:bg-secondary-green transition-colors font-medium shadow-md">
+                                <i class="fas fa-save mr-2"></i> Save Changes
+                            </button>
+                            <button type="button" class="flex-1 bg-red-500 text-white py-3 rounded-full hover:bg-red-600 transition-colors font-medium shadow-md">
+                                <i class="fas fa-user-times mr-2"></i> Delete Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Function to show specific tabs within the profile page
+        function showProfileTab(tabId) {
+            // Get all profile tab content sections
+            const tabs = document.querySelectorAll('.profile-tab-content');
+            // Hide all tab content
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabs.forEach(tab => tab.classList.add('hidden'));
+
+            // Show the requested tab content
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+                activeTab.classList.remove('hidden');
+            }
+
+            // Update active state for profile navigation links
+            const navLinks = document.querySelectorAll('aside nav a');
+            navLinks.forEach(link => {
+                link.classList.remove('bg-gray-100', 'text-dark-text');
+                link.classList.add('text-gray-700', 'hover:bg-gray-50');
+            });
+            
+            const activeNavLink = document.querySelector(`[onclick*="showProfileTab('${tabId}')"]`);
+            if (activeNavLink) {
+                activeNavLink.classList.add('bg-gray-100', 'text-dark-text');
+                activeNavLink.classList.remove('text-gray-700', 'hover:bg-gray-50');
+            }
+        }
+
+        // Initialize the first profile tab to be active on load
+        showProfileTab('my-profile');
+
+        // Handle initial tab selection if a specific tab is in the URL (e.g., from a redirect)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabFromUrl = urlParams.get('tab');
+        if (tabFromUrl) {
+            showProfileTab(tabFromUrl);
+        }
+    });
+</script>
+{% endblock %}

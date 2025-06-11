@@ -1,0 +1,93 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}{{ article.title }} - Blog{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-8 md:p-12">
+            {% if article.featured_image %}
+                <img src="{{ article.featured_image.url }}" alt="{{ article.title }} Featured Image" class="w-full h-auto rounded-lg mb-8 object-cover max-h-96">
+            {% endif %}
+            
+            <h1 class="text-4xl md:text-5xl font-extrabold text-dark-text mb-4 leading-tight">{{ article.title }}</h1>
+            <p class="text-lg text-gray-600 mb-6">
+                By <span class="font-semibold text-primary-green">{{ article.author.get_full_name|default:article.author.username }}</span> | {{ article.published_at|date:"M d, Y" }}
+            </p>
+
+            <div class="flex items-center space-x-4 mb-8">
+                {# Placeholder for article likes if you want to implement them later #}
+                <button class="text-primary-green hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-facebook"></i></button>
+                <button class="text-primary-green hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-twitter"></i></button>
+                <button class="text-primary-green hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-whatsapp"></i></button>
+            </div>
+
+            <div class="prose max-w-none text-gray-800 leading-relaxed text-lg">
+                {{ article.content|linebreaksbr }} {# Use safe filter if content contains HTML and you trust the source #}
+            </div>
+
+            <!-- Author Profile -->
+            <div class="mt-12 p-6 bg-off-white rounded-lg flex flex-col md:flex-row items-center md:space-x-6 shadow-inner">
+                {% if article.author.profile_pics %}
+                    <img src="{{ article.author.profile_pics.url }}" alt="{{ article.author.username }} Profile" class="w-24 h-24 rounded-full object-cover border-4 border-primary-green mb-4 md:mb-0">
+                {% else %}
+                    <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-3xl font-bold mr-3 mb-4 md:mb-0">{{ article.author.username|slice:":1"|upper }}</div>
+                {% endif %}
+                <div>
+                    <h3 class="text-xl font-bold text-dark-text mb-1">About the Author: {{ article.author.get_full_name|default:article.author.username }}</h3>
+                    <p class="text-gray-700">
+                        {{ article.author.bio|default:"No bio available." }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="mt-12">
+                <h2 class="text-3xl font-bold text-primary-green mb-6">Comments ({{ comments.count }})</h2>
+                
+                <!-- Comment Form -->
+                {% if user.is_authenticated %}
+                <div class="bg-off-white p-6 rounded-lg mb-8 shadow-sm">
+                    <h3 class="text-xl font-semibold text-dark-text mb-4">Leave a Comment</h3>
+                    <form method="post" action="{% url 'article_detail' article_id=article.id %}">
+                        {% csrf_token %}
+                        {{ comment_form.content }}
+                        <button type="submit" class="mt-4 bg-primary-green text-white px-6 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium">Submit Comment</button>
+                    </form>
+                    {% if comment_form.errors %}
+                        <ul class="text-red-500 text-sm mt-2">
+                            {% for field, errors in comment_form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field|title }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-center text-gray-600 mb-8">Please <a href="{% url 'login' %}" class="text-secondary-green hover:underline">login</a> to leave a comment.</p>
+                {% endif %}
+
+                <!-- Individual Comments -->
+                <div class="space-y-6">
+                    {% for comment in comments %}
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <div class="flex items-center mb-2">
+                            {% if comment.author.profile_pics %}
+                                <img src="{{ comment.author.profile_pics.url }}" alt="{{ comment.author.username }}" class="w-10 h-10 rounded-full object-cover mr-3 border-2 border-primary-green">
+                            {% else %}
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-bold mr-3">{{ comment.author.username|slice:":1"|upper }}</div>
+                            {% endif %}
+                            <p class="font-bold text-dark-text">{{ comment.author.get_full_name|default:comment.author.username }} <span class="text-gray-500 text-sm ml-2">{{ comment.created_at|date:"M d, Y" }} at {{ comment.created_at|time:"h:i A" }}</span></p>
+                        </div>
+                        <p class="mt-2 text-gray-700 leading-relaxed">{{ comment.content|linebreaksbr }}</p>
+                        
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-gray-600">No comments yet. Be the first to comment!</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

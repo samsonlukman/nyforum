@@ -1,0 +1,138 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}Chatbot - Nigerian Youth Forum{% endblock %}
+
+{% block content %}
+    <div class="py-16 flex items-center justify-center min-h-[calc(100vh-80px)]">
+        <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-2xl h-[70vh] flex flex-col">
+            <h1 class="text-4xl font-bold text-primary-green text-center mb-8">Chat with Our AI Assistant</h1>
+
+            <!-- Chat History Area -->
+            <div class="flex-1 bg-off-white rounded-lg p-6 overflow-y-auto mb-6 border border-gray-200">
+                <div class="space-y-4" id="chat-history">
+                    <!-- Chatbot Message -->
+                    <div class="flex justify-start">
+                        <div class="bg-gray-200 text-dark-text p-4 rounded-xl rounded-bl-none max-w-[70%] shadow-sm">
+                            <p>Hello! I'm your AI assistant for the Nigerian Youth Forum. How can I assist you today?</p>
+                        </div>
+                    </div>
+                    <!-- Example User Message -->
+                    <div class="flex justify-end">
+                        <div class="bg-primary-green text-white p-4 rounded-xl rounded-br-none max-w-[70%] shadow-sm">
+                            <p>Hi, can you tell me more about the upcoming youth summit?</p>
+                        </div>
+                    </div>
+                    <!-- Example Chatbot Message -->
+                    <div class="flex justify-start">
+                        <div class="bg-gray-200 text-dark-text p-4 rounded-xl rounded-bl-none max-w-[70%] shadow-sm">
+                            <p>Certainly! The National Youth Summit 2025 is scheduled for June 22nd at the Abuja Conference Center. It will focus on "Education Reform." You can find more details on our <a href="{% url 'events' %}" class="text-blue-600 hover:underline">Events page</a>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Field -->
+            <div class="flex items-center space-x-4">
+                <input type="text" id="chat-input" placeholder="Type your message here..." class="flex-1 px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green transition-colors text-lg">
+                <button id="send-button" class="bg-primary-green text-white p-3 rounded-full hover:bg-secondary-green transition-colors">
+                    <i class="fas fa-paper-plane text-xl"></i>
+                </button>
+            </div>
+            <p class="text-center text-sm text-gray-500 mt-4">The AI is for informational purposes only and does not provide legal advice.</p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // This is a placeholder for actual AI integration using an API.
+    // In a real application, you'd send the user's message to a backend endpoint,
+    // which would then communicate with your AI model (e.g., Gemini API).
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatHistory = document.getElementById('chat-history');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+
+        function appendMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.classList.add(
+                'p-4', 'rounded-xl', 'max-w-[70%]', 'shadow-sm',
+                sender === 'user' ? 'bg-primary-green text-white rounded-br-none' : 'bg-gray-200 text-dark-text rounded-bl-none'
+            );
+            bubbleDiv.innerHTML = `<p>${text}</p>`; // Use innerHTML for potential links
+            messageDiv.appendChild(bubbleDiv);
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to bottom
+        }
+
+        async function sendMessage() {
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            appendMessage('user', userMessage);
+            chatInput.value = ''; // Clear input
+
+            // Placeholder for loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('flex', 'justify-start');
+            loadingDiv.innerHTML = `<div class="bg-gray-200 text-dark-text p-4 rounded-xl rounded-bl-none max-w-[70%] shadow-sm"><i class="fas fa-spinner fa-spin mr-2"></i> Thinking...</div>`;
+            chatHistory.appendChild(loadingDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            try {
+                // In a real Django app, this fetch would go to a Django view
+                // that then calls the Gemini API.
+                // Example: const response = await fetch('/api/chatbot/', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'X-CSRFToken': getCookie('csrftoken')
+                //     },
+                //     body: JSON.stringify({ message: userMessage })
+                // });
+                // const data = await response.json();
+                // const botResponse = data.response;
+
+                // Simulate AI response for now
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+                const botResponse = `I'm a placeholder AI. You asked: "${userMessage}". I can help with information about the forum, articles, and events.`;
+                
+                loadingDiv.remove(); // Remove loading indicator
+                appendMessage('bot', botResponse);
+
+            } catch (error) {
+                console.error('Error fetching chatbot response:', error);
+                loadingDiv.remove();
+                appendMessage('bot', 'Sorry, I am having trouble connecting right now. Please try again later.');
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Function to get CSRF token (needed for Django POST requests)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

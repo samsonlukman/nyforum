@@ -1,0 +1,46 @@
+{% extends 'app/layout.html' %}
+{% load static %}
+
+{% block title %}Olajide Filani - Full Bio{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-8 md:p-12 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-primary-green mb-8">Olajide Filani</h1>
+            
+            {# Candidate Image with Green Border and circular shape #}
+            <div class="mb-8 mx-auto">
+                <img src="/media/profile_pics/olajide.png" 
+                     alt="Olajide Filani Profile Picture" 
+                     class="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover border-4 border-primary-green shadow-lg mx-auto">
+            </div>
+
+        
+            <div class="prose max-w-none text-gray-800 leading-relaxed text-lg text-left">
+                <p>
+                    <strong>Olajide Filani</strong> is a dynamic visionary whose life has been a testament to the transformative power of youth engagement and proactive leadership. Born and raised in the heart of Nigeria, Olajide witnessed firsthand the immense potential of his generation, alongside the systemic challenges hindering their progress. This ignited a lifelong passion for empowering young minds and reshaping the national narrative.
+                </p>
+                <br>
+                <p>
+                    His journey began not in political corridors, but in community development initiatives, where he successfully championed vocational training programs that equipped thousands of underserved youths with marketable skills. Olajide’s innovative approach to problem-solving quickly gained recognition, as did his unwavering commitment to transparency and accountability. He founded <em>Youth Catalyst Network</em>, an organization that has since become a powerful voice for young Nigerians, fostering civic education, promoting digital literacy, and encouraging participation in governance at all levels.
+                </p>
+            <br>
+                <p>
+                    As an aspiring presidential candidate, Olajide Filani brings a fresh perspective rooted in genuine connection with the populace. He champions a progressive agenda focused on three core pillars: <strong>Economic Innovation</strong>, advocating for policies that enable youth-led startups and diversified revenue streams; <strong>Educational Reform</strong>, pushing for a curriculum that prioritizes critical thinking and practical skills; and <strong>Inclusive Governance</strong>, ensuring that the voices of every Nigerian, particularly the marginalized, are central to national development.
+                </p>
+            <br>
+                <p>
+                    Olajide believes that Nigeria's greatest resource is its human capital, and his presidency would be dedicated to unlocking the full potential of its vibrant youth. He is committed to building a Nigeria where opportunity is boundless, where every young person has the tools to succeed, and where collective progress is a shared national endeavor. His vision isn't just about leadership; it's about igniting a movement for a truly transformed and prosperous Nigeria.
+                </p>
+            </div>
+            
+
+            {# Optional: Back button or other navigation #}
+            <div class="mt-12">
+                <a href="{% url 'home' %}" class="bg-primary-green text-white px-8 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

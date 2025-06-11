@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nigerian Youth Forum{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Define custom CSS variables for colors */
+        :root {
+            --primary-green: #008000;
+            --secondary-green: #36A13B;
+            --white: #FFFFFF;
+            --off-white: #F8F8F8;
+            --dark-text: #333333;
+            --accent-gray: #777777;
+        }
+
+        /* Custom Tailwind classes using CSS variables */
+        .bg-primary-green { background-color: var(--primary-green); }
+        .bg-secondary-green { background-color: var(--secondary-green); }
+        .text-primary-green { color: var(--primary-green); }
+        .text-secondary-green { color: var(--secondary-green); }
+        .border-primary-green { border-color: var(--primary-green); }
+        .hover\:bg-secondary-green:hover { background-color: var(--secondary-green); }
+        .hover\:text-primary-green:hover { color: var(--primary-green); }
+
+        /* General styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--dark-text);
+            background-color: var(--off-white);
+        }
+
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom styles for form fields to match Tailwind */
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea, select {
+            @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-green transition-colors;
+        }
+        input[type="checkbox"] {
+            @apply h-5 w-5 text-primary-green rounded-md focus:ring-primary-green mr-2;
+            color: var(--primary-green); /* Ensures checkbox color */
+        }
+        /* Custom file input styling */
+        input[type="file"] {
+            @apply bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-green file:text-white hover:file:bg-secondary-green cursor-pointer;
+        }
+
+        /* Django messages styling */
+        .messages {
+            list-style: none;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+        .messages li {
+            padding: 0.5rem 0;
+        }
+        .messages .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .messages .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .messages .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .messages .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-md py-4 px-6 md:px-12 flex justify-between items-center fixed w-full z-50 rounded-b-lg">
+        <div class="flex items-center space-x-2">
+            <!-- Placeholder Logo -->
+            <div class="w-10 h-10 bg-primary-green rounded-full flex items-center justify-center text-white font-bold text-lg">NYF</div>
+            <a href="{% url 'home' %}" class="text-2xl font-bold text-primary-green">Nigerian Youth Forum</a>
+        </div>
+        <nav class="hidden md:flex space-x-8">
+            <a href="{% url 'home' %}" class="text-lg text-gray-700 hover:text-primary-green transition-colors font-medium">Home</a>
+            <a href="{% url 'about' %}" class="text-lg text-gray-700 hover:text-primary-green transition-colors font-medium">About Us</a>
+            <a href="{% url 'forum_list' %}" class="text-lg text-gray-700 hover:text-primary-green transition-colors font-medium">Forum</a>
+            <a href="{% url 'article_list' %}" class="text-lg text-gray-700 hover:text-primary-green transition-colors font-medium">Blog</a>
+            <a href="{% url 'events' %}" class="text-lg text-gray-700 hover:text-primary-green transition-colors font-medium">Events</a>
+            <a href="{% url 'contact' %}" class="text-lg text-gray-700 hover:text-primary-green transition-colors font-medium">Contact Us</a>
+        </nav>
+        <div class="space-x-4 hidden md:block">
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' username=user.username %}" class="px-6 py-2 border border-primary-green text-primary-green rounded-full hover:bg-primary-green hover:text-white transition-all font-medium">Profile</a>
+                <a href="{% url 'logout' %}" class="px-6 py-2 bg-primary-green text-white rounded-full hover:bg-secondary-green transition-all font-medium">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="px-6 py-2 border border-primary-green text-primary-green rounded-full hover:bg-primary-green hover:text-white transition-all font-medium">Login</a>
+                <a href="{% url 'register' %}" class="px-6 py-2 bg-primary-green text-white rounded-full hover:bg-secondary-green transition-all font-medium">Register</a>
+            {% endif %}
+        </div>
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden text-primary-green text-2xl" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-primary-green bg-opacity-95 z-40 hidden flex-col items-center justify-center space-y-8 text-white text-2xl">
+        <button class="absolute top-6 right-6 text-white text-3xl" onclick="toggleMobileMenu()">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="{% url 'home' %}" class="hover:underline" onclick="toggleMobileMenu();">Home</a>
+        <a href="{% url 'about' %}" class="hover:underline" onclick="toggleMobileMenu();">About Us</a>
+        <a href="{% url 'forum_list' %}" class="hover:underline" onclick="toggleMobileMenu();">Forum</a>
+        <a href="{% url 'article_list' %}" class="hover:underline" onclick="toggleMobileMenu();">Blog</a>
+        <a href="{% url 'events' %}" class="hover:underline" onclick="toggleMobileMenu();">Events</a>
+        <a href="{% url 'contact' %}" class="hover:underline" onclick="toggleMobileMenu();">Contact Us</a>
+        <div class="pt-4 flex flex-col space-y-4">
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' username=user.username %}" class="px-8 py-3 border border-white text-white rounded-full hover:bg-white hover:text-primary-green transition-all" onclick="toggleMobileMenu();">Profile</a>
+                <a href="{% url 'logout' %}" class="px-8 py-3 bg-white text-primary-green rounded-full hover:opacity-90 transition-all" onclick="toggleMobileMenu();">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="px-8 py-3 border border-white text-white rounded-full hover:bg-white hover:text-primary-green transition-all" onclick="toggleMobileMenu();">Login</a>
+                <a href="{% url 'register' %}" class="px-8 py-3 bg-white text-primary-green rounded-full hover:opacity-90 transition-all" onclick="toggleMobileMenu();">Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Content Area - Padding for fixed header -->
+    <main class="flex-grow pt-20">
+        <!-- Django Messages -->
+        {% if messages %}
+            <ul class="messages container mx-auto px-4 mt-4">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-primary-green text-white py-12 px-6 rounded-t-lg mt-auto">
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- About Section -->
+            <div>
+                <h3 class="text-xl font-bold mb-4">Nigerian Youth Forum</h3>
+                <p class="text-sm leading-relaxed mb-4">Empowering the next generation of Nigerian leaders through engagement, education, and advocacy.</p>
+                <div class="flex space-x-4">
+                    <a href="https://www.facebook.com/groups/unitednyf/?ref=share&mibextid=NSMWBT" target="_blank" class="text-white hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-facebook-square"></i></a>
+                    <a href="https://x.com/NGNYouthForum?t=QHy492ThbGHI9HycmMQ_AQ&s=08"target="_blank" class="text-white hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-twitter-square"></i></a>
+                    <a href="#" class="text-white hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-instagram-square"></i></a>
+                    <a href="#" class="text-white hover:text-secondary-green transition-colors text-2xl"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+                <ul class="space-y-2">
+                    <li><a href="{% url 'about' %}" class="hover:underline">About Us</a></li>
+                    <li><a href="{% url 'forum_list' %}" class="hover:underline">Forum</a></li>
+                    <li><a href="{% url 'article_list' %}" class="hover:underline">Blog / Articles</a></li>
+                    <li><a href="{% url 'events' %}" class="hover:underline">Events</a></li>
+                </ul>
+            </div>
+
+            <!-- Support -->
+            <div>
+                <h3 class="text-xl font-bold mb-4">Support</h3>
+                <ul class="space-y-2">
+                    <li><a href="{% url 'contact' %}" class="hover:underline">Contact Us</a></li>
+                    <li><a href="{% url 'faq' %}" class="hover:underline">FAQ</a></li>
+                    <li><a href="{% url 'privacy' %}" class="hover:underline">Privacy Policy</a></li>
+                    <li><a href="{% url 'terms' %}" class="hover:underline">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div>
+                <h3 class="text-xl font-bold mb-4">Contact Info</h3>
+                <p class="text-sm mb-2"><i class="fas fa-map-marker-alt mr-2"></i>123 Youth Plaza, Abuja, Nigeria</p>
+                <p class="text-sm mb-2"><i class="fas fa-envelope mr-2"></i>info@nigerianyouthforum.org</p>
+                <p class="text-sm mb-2"><i class="fas fa-phone-alt mr-2"></i>+234 801 234 5678</p>
+            </div>
+        </div>
+        <div class="text-center text-sm mt-8 border-t border-secondary-green pt-6">
+            &copy; 2025 Nigerian Youth Forum. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Function to toggle mobile menu visibility
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+        }
+
+        // Script to hide Django messages after a few seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const messages = document.querySelector('.messages');
+            if (messages) {
+                setTimeout(() => {
+                    messages.style.transition = 'opacity 0.5s ease-out';
+                    messages.style.opacity = '0';
+                    setTimeout(() => messages.remove(), 500); // Remove after transition
+                }, 5000); // Hide after 5 seconds
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

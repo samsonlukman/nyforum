@@ -1,0 +1,95 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}FAQ - Nigerian Youth Forum{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-8 md:p-12 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-primary-green mb-8">Frequently Asked Questions</h1>
+            
+            <p class="text-lg text-gray-700 leading-relaxed mb-10">
+                Find answers to common questions about the Nigerian Youth Forum, our mission, and how you can get involved.
+            </p>
+
+            <div class="space-y-4 text-left">
+                <!-- FAQ Item 1 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-6 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center text-xl font-semibold text-dark-text" onclick="toggleAccordion(this)">
+                        What is the Nigerian Youth Forum?
+                        <i class="fas fa-chevron-down text-primary-green transition-transform duration-300 transform rotate-0"></i>
+                    </button>
+                    <div class="p-6 text-gray-700 hidden">
+                        <p>The Nigerian Youth Forum is a dynamic online platform dedicated to empowering young Nigerians. We provide a space for discussion, learning, and collaboration on critical issues affecting youth, such as politics, governance, youth empowerment, and national development.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-6 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center text-xl font-semibold text-dark-text" onclick="toggleAccordion(this)">
+                        How can I join the Nigerian Youth Forum?
+                        <i class="fas fa-chevron-down text-primary-green transition-transform duration-300 transform rotate-0"></i>
+                    </button>
+                    <div class="p-6 text-gray-700 hidden">
+                        <p>Joining is easy! Simply navigate to the "Register" page and fill out the sign-up form. Once registered, you'll gain access to our forum discussions, be able to post articles, and engage with other members.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-6 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center text-xl font-semibold text-dark-text" onclick="toggleAccordion(this)">
+                        What kind of content can I find on the blog?
+                        <i class="fas fa-chevron-down text-primary-green transition-transform duration-300 transform rotate-0"></i>
+                    </button>
+                    <div class="p-6 text-gray-700 hidden">
+                        <p>Our blog features insightful articles on various topics, including elections, leadership, economy, youth empowerment, and general issues relevant to Nigeria. Content is posted by our admin team and verified users, providing diverse perspectives and valuable information.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-6 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center text-xl font-semibold text-dark-text" onclick="toggleAccordion(this)">
+                        Is there a moderation policy for forum discussions?
+                        <i class="fas fa-chevron-down text-primary-green transition-transform duration-300 transform rotate-0"></i>
+                    </button>
+                    <div class="p-6 text-gray-700 hidden">
+                        <p>Yes, we maintain a positive and respectful environment. All forum discussions and comments are subject to our moderation policy to ensure constructive dialogue and prevent hate speech or harassment. Please review our Terms of Service for full details.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-6 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center text-xl font-semibold text-dark-text" onclick="toggleAccordion(this)">
+                        How can I contribute an article or forum post?
+                        <i class="fas fa-chevron-down text-primary-green transition-transform duration-300 transform rotate-0"></i>
+                    </button>
+                    <div class="p-6 text-gray-700 hidden">
+                        <p>Authenticated users can write articles or forum posts by visiting the "Write a Post" page. Articles are submitted for review by our moderation team before publication, while forum posts are typically live immediately.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <button class="w-full text-left p-6 bg-gray-50 hover:bg-gray-100 focus:outline-none flex justify-between items-center text-xl font-semibold text-dark-text" onclick="toggleAccordion(this)">
+                        How can I contact the Nigerian Youth Forum?
+                        <i class="fas fa-chevron-down text-primary-green transition-transform duration-300 transform rotate-0"></i>
+                    </button>
+                    <div class="p-6 text-gray-700 hidden">
+                        <p>You can reach us via the "Contact Us" page, where you'll find a contact form for inquiries. We also provide WhatsApp and other chat links for direct communication.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleAccordion(button) {
+        const content = button.nextElementSibling;
+        const icon = button.querySelector('i');
+
+        content.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
+    }
+</script>
+{% endblock %}

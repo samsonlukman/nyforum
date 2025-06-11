@@ -1,0 +1,95 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}Events - Nigerian Youth Forum{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16">
+        <h1 class="text-5xl font-extrabold text-primary-green text-center mb-12">Upcoming Events & Opportunities</h1>
+
+        <!-- Filter/Search -->
+        <div class="flex flex-col md:flex-row justify-between items-center bg-white rounded-xl shadow-lg p-6 mb-12">
+            <form method="get" action="{% url 'events' %}" class="w-full flex flex-col md:flex-row items-center justify-between gap-4">
+                <input type="text" name="q" placeholder="Search events..." class="flex-grow px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green transition-colors text-lg" value="{{ current_query|default:'' }}">
+                
+                <select name="category" class="px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green bg-white text-dark-text">
+                    <option value="all">All Categories</option>
+                    {% for value, label in categories %}
+                        <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                
+                <select name="sort" class="px-6 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-primary-green bg-white text-dark-text">
+                    <option value="upcoming">Upcoming</option>
+                    <option value="past">Past</option>
+                </select>
+                <button type="submit" class="bg-primary-green text-white px-6 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium">Apply Filters</button>
+            </form>
+        </div>
+
+        <!-- Upcoming Event Cards -->
+        {% if upcoming_events %}
+        <h2 class="text-4xl font-bold text-primary-green mb-8">Upcoming Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {% for event in upcoming_events %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" alt="{{ event.title }} Image" class="w-full h-48 object-cover">
+                {% else %}
+                    <img src="https://placehold.co/600x300/008000/FFFFFF?text={{ event.title|truncatechars:15 }}" alt="Placeholder" class="w-full h-48 object-cover">
+                {% endif %}
+                <div class="p-6">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-primary-green text-white p-2 rounded-md text-center flex-shrink-0">
+                            <p class="text-xl font-bold">{{ event.date_time|date:"d" }}</p>
+                            <p class="text-xs">{{ event.date_time|date:"M"|upper }}</p>
+                        </div>
+                        <h3 class="text-xl font-bold text-dark-text ml-4">{{ event.title }}</h3>
+                    </div>
+                    <p class="text-gray-700 mb-2"><i class="fas fa-map-marker-alt mr-2 text-secondary-green"></i>{{ event.location }}</p>
+                    <p class="text-gray-700 mb-4"><i class="fas fa-clock mr-2 text-secondary-green"></i>{{ event.date_time|date:"M d, Y" }} | {{ event.date_time|time:"h:i A" }} WAT</p>
+                    <p class="text-gray-600 leading-relaxed mb-4">{{ event.description|truncatechars:100 }}</p>
+                    {% if event.registration_link %}
+                        <a href="{{ event.registration_link }}" target="_blank" class="bg-primary-green text-white px-6 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium w-full text-center block">RSVP / Register</a>
+                    {% else %}
+                        <button class="bg-gray-400 text-white px-6 py-3 rounded-full w-full cursor-not-allowed" disabled>Registration Closed</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="text-center text-gray-600 mb-16">No upcoming events found.</p>
+        {% endif %}
+
+        <!-- Past Events Section -->
+        {% if past_events %}
+        <h2 class="text-4xl font-bold text-primary-green text-center mb-8 mt-16">Past Events</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-60">
+            {% for event in past_events %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" alt="{{ event.title }} Image" class="w-full h-48 object-cover">
+                {% else %}
+                    <img src="https://placehold.co/600x300/CCCCCC/666666?text={{ event.title|truncatechars:15 }}" alt="Placeholder" class="w-full h-48 object-cover">
+                {% endif %}
+                <div class="p-6">
+                    <div class="flex items-center mb-3">
+                        <div class="bg-gray-400 text-white p-2 rounded-md text-center flex-shrink-0">
+                            <p class="text-xl font-bold">{{ event.date_time|date:"d" }}</p>
+                            <p class="text-xs">{{ event.date_time|date:"M"|upper }}</p>
+                        </div>
+                        <h3 class="text-xl font-bold text-dark-text ml-4">{{ event.title }}</h3>
+                    </div>
+                    <p class="text-gray-700 mb-2"><i class="fas fa-map-marker-alt mr-2"></i>{{ event.location }}</p>
+                    <p class="text-gray-700 mb-4"><i class="fas fa-clock mr-2"></i>{{ event.date_time|date:"M d, Y" }}</p>
+                    <p class="text-gray-600 leading-relaxed mb-4">{{ event.description|truncatechars:100 }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="text-center text-gray-600 mt-8">No past events found.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+

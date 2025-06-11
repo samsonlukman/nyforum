@@ -1,0 +1,71 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}About Us - Nigerian Youth Forum{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-16">
+        <h1 class="text-5xl font-extrabold text-primary-green text-center mb-16">About Us</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+            <div>
+                <h2 class="text-3xl font-bold text-dark-text mb-6">Our Mission, Vision, and Values</h2>
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-primary-green mb-2"><i class="fas fa-bullseye mr-3"></i>Our Mission</h3>
+                        <p class="text-lg text-gray-700 leading-relaxed">To foster a vibrant community of Nigerian youth, empowering them with knowledge, skills, and opportunities to drive positive change and actively participate in nation-building.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-primary-green mb-2"><i class="fas fa-eye mr-3"></i>Our Vision</h3>
+                        <p class="text-lg text-gray-700 leading-relaxed">To be the leading platform for youth engagement, advocacy, and development, shaping a future where young Nigerians are at the forefront of leadership and innovation.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-primary-green mb-2"><i class="fas fa-handshake mr-3"></i>Our Values</h3>
+                        <ul class="list-disc list-inside text-lg text-gray-700 space-y-2">
+                            <li><strong>Integrity:</strong> Upholding honesty and transparency in all our dealings.</li>
+                            <li><strong>Empowerment:</strong> Providing tools and resources for youth growth.</li>
+                            <li><strong>Unity:</strong> Fostering collaboration and inclusivity among diverse youth.</li>
+                            <li><strong>Innovation:</strong> Encouraging creative solutions to societal challenges.</li>
+                            <li><strong>Accountability:</strong> Taking responsibility for our actions and commitments.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <img src="https://placehold.co/700x500/008000/FFFFFF?text=Youth+Leadership" alt="Youth Leadership" class="rounded-xl shadow-xl w-full">
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-10 md:p-16 mb-16">
+            <h2 class="text-4xl font-bold text-primary-green text-center mb-8">What Makes This Platform Unique?</h2>
+            <p class="text-lg md:text-xl text-gray-700 leading-relaxed text-center max-w-4xl mx-auto">
+                The Nigerian Youth Forum stands out by offering a holistic ecosystem for youth development.
+                We combine robust discussion forums, insightful blog articles, a dedicated AI chatbot for instant information,
+                and a comprehensive event calendar, all within a vibrant, inclusive community focused on amplifying the youth voice in national discourse.
+                Our platform is designed to be a central hub for advocacy, learning, and networking.
+            </p>
+        </div>
+
+        <!-- Optional Team Section -->
+        <h2 class="text-4xl font-bold text-primary-green text-center mb-12">Meet Our Team</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
+                <img src="https://placehold.co/200x200/36A13B/FFFFFF?text=Jane" alt="Team Member" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-secondary-green">
+                <h3 class="text-xl font-bold text-dark-text mb-2">Jane Doe</h3>
+                <p class="text-primary-green font-semibold">Founder & CEO</p>
+                <p class="text-gray-700 text-sm mt-3">Passionate about youth empowerment and good governance. Jane leads the vision for NYF.</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
+                <img src="https://placehold.co/200x200/36A13B/FFFFFF?text=John" alt="Team Member" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-secondary-green">
+                <h3 class="text-xl font-bold text-dark-text mb-2">John Smith</h3>
+                <p class="text-primary-green font-semibold">Head of Content</p>
+                <p class="text-gray-700 text-sm mt-3">Curates insightful articles and manages the blog section, ensuring quality and relevance.</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center transform hover:scale-105 transition-transform duration-300">
+                <img src="https://placehold.co/200x200/36A13B/FFFFFF?text=Chika" alt="Team Member" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-secondary-green">
+                <h3 class="text-xl font-bold text-dark-text mb-2">Chika Okoro</h3>
+                <p class="text-primary-green font-semibold">Community Manager</p>
+                <p class="text-gray-700 text-sm mt-3">Ensures a vibrant and respectful forum environment, engaging with members daily.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
