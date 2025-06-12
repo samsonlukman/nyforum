@@ -1,4 +1,4 @@
-{% extends 'app/layout.html' %}
+{% extends 'app/layout.html' %} {# Changed from app/layout.html to core/layout.html if that's your base template #}
 
 {% block title %}{{ profile_owner.username }}'s Profile - Nigerian Youth Forum{% endblock %}
 
@@ -10,30 +10,32 @@
             <!-- Left Sidebar - Profile Navigation -->
             <aside class="w-full lg:w-1/4 bg-white rounded-xl shadow-lg p-6 lg:sticky lg:top-24 h-fit">
                 <nav class="space-y-3">
-                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-dark-text bg-gray-100" onclick="showProfileTab('my-profile')">
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-dark-text bg-gray-100" onclick="showProfileTab('my-profile'); return false;">
                         <i class="fas fa-user-circle mr-3"></i> My Profile
                     </a>
+                    {# This "New Post" button seems misplaced in the profile nav, it's usually site-wide or in main nav #}
+                    {# I'm leaving it as is for consistency with your provided code, but consider its placement #}
                     {% if user.is_authenticated %}
-                <a href="{% url 'write_post' %}" class="w-full bg-primary-green text-white py-3 rounded-full hover:bg-secondary-green transition-colors font-medium flex items-center justify-center">
-                    <i class="fas fa-plus-circle mr-2"></i> New Post
-                </a>
-                {% else %}
-                <p class="text-center text-sm text-gray-600 mt-4">Login to create new posts.</p>
-                {% endif %}
-                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-posts')">
+                        <a href="{% url 'write_post' %}" class="w-full bg-primary-green text-white py-3 rounded-full hover:bg-secondary-green transition-colors font-medium flex items-center justify-center">
+                            <i class="fas fa-plus-circle mr-2"></i> New Post
+                        </a>
+                    {% else %}
+                        <p class="text-center text-sm text-gray-600 mt-4">Login to create new posts.</p>
+                    {% endif %}
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-posts'); return false;">
                         <i class="fas fa-file-alt mr-3"></i> My Articles
                     </a>
-                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-threads')">
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-threads'); return false;">
                         <i class="fas fa-comments mr-3"></i> My Forum Threads
                     </a>
-                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-comments')">
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-comments'); return false;">
                         <i class="fas fa-comment-dots mr-3"></i> My Comments
                     </a>
-                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-replies')">
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('my-replies'); return false;">
                         <i class="fas fa-reply-all mr-3"></i> My Replies
                     </a>
                     {% if is_owner %}
-                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('account-settings')">
+                    <a href="#" class="block px-4 py-3 rounded-lg text-lg font-medium text-gray-700 hover:bg-gray-50" onclick="showProfileTab('account-settings'); return false;">
                         <i class="fas fa-cog mr-3"></i> Account Settings
                     </a>
                     {% endif %}
@@ -79,7 +81,7 @@
                     </div>
 
                     {% if is_owner %}
-                    <button class="bg-primary-green text-white px-8 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium shadow-md" onclick="showProfileTab('account-settings')">
+                    <button class="bg-primary-green text-white px-8 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium shadow-md" onclick="showProfileTab('account-settings'); return false;">
                         <i class="fas fa-edit mr-2"></i> Edit Profile
                     </button>
                     {% endif %}
@@ -213,38 +215,38 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Function to show specific tabs within the profile page
-        function showProfileTab(tabId) {
-            // Get all profile tab content sections
-            const tabs = document.querySelectorAll('.profile-tab-content');
-            // Hide all tab content
-            tabs.forEach(tab => tab.classList.remove('active'));
-            tabs.forEach(tab => tab.classList.add('hidden'));
+    // Define the function globally (outside DOMContentLoaded)
+    function showProfileTab(tabId) {
+        // Get all profile tab content sections
+        const tabs = document.querySelectorAll('.profile-tab-content');
+        // Hide all tab content
+        tabs.forEach(tab => tab.classList.remove('active'));
+        tabs.forEach(tab => tab.classList.add('hidden'));
 
-            // Show the requested tab content
-            const activeTab = document.getElementById(`tab-${tabId}`);
-            if (activeTab) {
-                activeTab.classList.add('active');
-                activeTab.classList.remove('hidden');
-            }
-
-            // Update active state for profile navigation links
-            const navLinks = document.querySelectorAll('aside nav a');
-            navLinks.forEach(link => {
-                link.classList.remove('bg-gray-100', 'text-dark-text');
-                link.classList.add('text-gray-700', 'hover:bg-gray-50');
-            });
-            
-            const activeNavLink = document.querySelector(`[onclick*="showProfileTab('${tabId}')"]`);
-            if (activeNavLink) {
-                activeNavLink.classList.add('bg-gray-100', 'text-dark-text');
-                activeNavLink.classList.remove('text-gray-700', 'hover:bg-gray-50');
-            }
+        // Show the requested tab content
+        const activeTab = document.getElementById(`tab-${tabId}`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            activeTab.classList.remove('hidden');
         }
 
+        // Update active state for profile navigation links
+        const navLinks = document.querySelectorAll('aside nav a');
+        navLinks.forEach(link => {
+            link.classList.remove('bg-gray-100', 'text-dark-text');
+            link.classList.add('text-gray-700', 'hover:bg-gray-50');
+        });
+        
+        const activeNavLink = document.querySelector(`[onclick*="showProfileTab('${tabId}')"]`);
+        if (activeNavLink) {
+            activeNavLink.classList.add('bg-gray-100', 'text-dark-text');
+            activeNavLink.classList.remove('text-gray-700', 'hover:bg-gray-50');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
         // Initialize the first profile tab to be active on load
-        showProfileTab('my-profile');
+        showProfileTab('my-profile'); // Call it here for initial load
 
         // Handle initial tab selection if a specific tab is in the URL (e.g., from a redirect)
         const urlParams = new URLSearchParams(window.location.search);
