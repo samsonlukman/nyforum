@@ -48,7 +48,7 @@
                 {% if user.is_authenticated %}
                 <div class="bg-off-white p-6 rounded-lg mb-8 shadow-sm">
                     <h3 class="text-xl font-semibold text-dark-text mb-4">Leave a Comment</h3>
-                    <form method="post" action="{% url 'article_detail' article_id=article.id %}">
+                      <form method="post" action="{% url 'article_detail' slug=article.slug %}"> {# Updated action URL #}
                         {% csrf_token %}
                         {{ comment_form.content }}
                         <button type="submit" class="mt-4 bg-primary-green text-white px-6 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium">Submit Comment</button>

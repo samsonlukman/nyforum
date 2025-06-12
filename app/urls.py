@@ -15,10 +15,12 @@ urlpatterns = [
     path('forum/reply/<int:reply_id>/like/', views.like_reply_view, name='like_reply'), # AJAX endpoint
 
     path('blog/', views.article_list_view, name='article_list'),
-    path('blog/<int:article_id>/', views.article_detail_view, name='article_detail'),
+    path('blog/<slug:slug>/', views.article_detail_view, name='article_detail'), # Changed to slug
+
 
     path('write-post/', views.write_post_view, name='write_post'),
     path('chatbot/', views.chatbot_view, name='chatbot'),
+    path('api/chatbot/', views.chatbot_api_view, name='chatbot_api'), 
     path('contact/', views.contact_view, name='contact'),
     path('events/', views.events_view, name='events'),
 

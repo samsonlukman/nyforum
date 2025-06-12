@@ -1,6 +1,6 @@
 {% extends 'app/layout.html' %}
 
-{% block title %}Blog - Nigerian Youth Forum{% endblock %}
+{% block title %}Blog - Unified Nigerian Youth Forum{% endblock %}
 
 {% block content %}
     <div class="container mx-auto px-4 py-16">
@@ -33,13 +33,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for article in articles %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                <a href="{% url 'article_detail' slug=article.slug %}">
                 {% if article.featured_image %}
                     <img src="{{ article.featured_image.url }}" alt="{{ article.title }} Thumbnail" class="w-full h-48 object-cover">
                 {% else %}
                     <img src="https://placehold.co/600x400/008000/FFFFFF?text={{ article.title|truncatechars:15 }}" alt="Placeholder" class="w-full h-48 object-cover">
                 {% endif %}
                 <div class="p-6">
-                    <a href="{% url 'article_detail' article_id=article.id %}">
                     <h3 class="text-xl font-bold text-dark-text mb-2">{{ article.title }}</h3>
                     <p class="text-gray-600 text-sm mb-4">
                         By {{ article.author.get_full_name|default:article.author.username }} | {{ article.published_at|date:"M d, Y" }} | 

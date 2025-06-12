@@ -1,31 +1,23 @@
 {% extends 'app/layout.html' %}
 
-{% block title %}Chatbot - Nigerian Youth Forum{% endblock %}
+{% block title %}Chatbot - Unified Nigerian Youth Forum{% endblock %}
 
 {% block content %}
     <div class="py-16 flex items-center justify-center min-h-[calc(100vh-80px)]">
         <div class="bg-white rounded-xl shadow-xl p-8 w-full max-w-2xl h-[70vh] flex flex-col">
             <h1 class="text-4xl font-bold text-primary-green text-center mb-8">Chat with Our AI Assistant</h1>
-
+            
+            {% if not user.is_authenticated %}
+            <p class="text-center text-gray-600 mb-8">Please <a href="{% url 'login' %}" class="text-secondary-green hover:underline">login</a> to use the chatbot.</p>
+            {% else %}
             <!-- Chat History Area -->
-            <div class="flex-1 bg-off-white rounded-lg p-6 overflow-y-auto mb-6 border border-gray-200">
-                <div class="space-y-4" id="chat-history">
-                    <!-- Chatbot Message -->
+            <div class="flex-1 bg-off-white rounded-lg p-6 overflow-y-auto mb-6 border border-gray-200 flex flex-col" id="chat-history-container">
+                <div class="space-y-4 flex-grow" id="chat-history">
+                    {# Initial Welcome Message from Bot #}
                     <div class="flex justify-start">
-                        <div class="bg-gray-200 text-dark-text p-4 rounded-xl rounded-bl-none max-w-[70%] shadow-sm">
-                            <p>Hello! I'm your AI assistant for the Nigerian Youth Forum. How can I assist you today?</p>
-                        </div>
-                    </div>
-                    <!-- Example User Message -->
-                    <div class="flex justify-end">
-                        <div class="bg-primary-green text-white p-4 rounded-xl rounded-br-none max-w-[70%] shadow-sm">
-                            <p>Hi, can you tell me more about the upcoming youth summit?</p>
-                        </div>
-                    </div>
-                    <!-- Example Chatbot Message -->
-                    <div class="flex justify-start">
-                        <div class="bg-gray-200 text-dark-text p-4 rounded-xl rounded-bl-none max-w-[70%] shadow-sm">
-                            <p>Certainly! The National Youth Summit 2025 is scheduled for June 22nd at the Abuja Conference Center. It will focus on "Education Reform." You can find more details on our <a href="{% url 'events' %}" class="text-blue-600 hover:underline">Events page</a>.</p>
+                        <div class="p-4 rounded-xl max-w-[70%] shadow-sm bg-gray-200 text-dark-text rounded-bl-none">
+                            <p>Hello! I'm your AI assistant for the Unified Nigerian Youth Forum. How can I assist you today?</p>
+                            <span class="block text-right text-xs mt-1 text-gray-500">{{ "now"|date:"h:i A" }}</span>
                         </div>
                     </div>
                 </div>
@@ -38,87 +30,54 @@
                     <i class="fas fa-paper-plane text-xl"></i>
                 </button>
             </div>
-            <p class="text-center text-sm text-gray-500 mt-4">The AI is for informational purposes only and does not provide legal advice.</p>
+            <p class="text-center text-sm text-gray-500 mt-4">The AI is for informational purposes only and does not provide legal advice. Type "speak to human" for direct support.</p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
 
 {% block extra_js %}
+{% if user.is_authenticated %}
 <script>
-    // This is a placeholder for actual AI integration using an API.
-    // In a real application, you'd send the user's message to a backend endpoint,
-    // which would then communicate with your AI model (e.g., Gemini API).
-
     document.addEventListener('DOMContentLoaded', () => {
+        const chatHistoryContainer = document.getElementById('chat-history-container');
         const chatHistory = document.getElementById('chat-history');
         const chatInput = document.getElementById('chat-input');
         const sendButton = document.getElementById('send-button');
 
-        function appendMessage(sender, text) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
-            
-            const bubbleDiv = document.createElement('div');
-            bubbleDiv.classList.add(
-                'p-4', 'rounded-xl', 'max-w-[70%]', 'shadow-sm',
-                sender === 'user' ? 'bg-primary-green text-white rounded-br-none' : 'bg-gray-200 text-dark-text rounded-bl-none'
-            );
-            bubbleDiv.innerHTML = `<p>${text}</p>`; // Use innerHTML for potential links
-            messageDiv.appendChild(bubbleDiv);
-            chatHistory.appendChild(messageDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to bottom
+        // Forum contact email passed from Django settings for the hand-off response
+        const forumContactEmail = "{{ forum_contact_email }}";
+
+        // Function to scroll to the bottom of the chat
+        function scrollToBottom() {
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
         }
 
-        async function sendMessage() {
-            const userMessage = chatInput.value.trim();
-            if (!userMessage) return;
+        // Append a new message to the chat history
+        // Append a new message to the chat history
+function appendMessage(sender, text, timestamp) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('flex', sender === 'user' ? 'justify-end' : 'justify-start');
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.classList.add(
+        'p-4', 'rounded-xl', 'max-w-[70%]', 'shadow-sm'
+    );
 
-            appendMessage('user', userMessage);
-            chatInput.value = ''; // Clear input
+    if (sender === 'user') {
+        bubbleDiv.classList.add('bg-primary-green', 'text-white', 'rounded-br-none');
+    } else { // bot
+        bubbleDiv.classList.add('bg-gray-200', 'text-dark-text', 'rounded-bl-none');
+    }
+    
+    // For bot messages that might contain HTML links
+    bubbleDiv.innerHTML = `<p>${text}</p><span class="block text-right text-xs mt-1 ${sender === 'user' ? 'text-white opacity-70' : 'text-gray-500'}">${timestamp}</span>`;
+    messageDiv.appendChild(bubbleDiv);
+    chatHistory.appendChild(messageDiv);
+    scrollToBottom();
+}
 
-            // Placeholder for loading indicator
-            const loadingDiv = document.createElement('div');
-            loadingDiv.classList.add('flex', 'justify-start');
-            loadingDiv.innerHTML = `<div class="bg-gray-200 text-dark-text p-4 rounded-xl rounded-bl-none max-w-[70%] shadow-sm"><i class="fas fa-spinner fa-spin mr-2"></i> Thinking...</div>`;
-            chatHistory.appendChild(loadingDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-
-            try {
-                // In a real Django app, this fetch would go to a Django view
-                // that then calls the Gemini API.
-                // Example: const response = await fetch('/api/chatbot/', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //         'X-CSRFToken': getCookie('csrftoken')
-                //     },
-                //     body: JSON.stringify({ message: userMessage })
-                // });
-                // const data = await response.json();
-                // const botResponse = data.response;
-
-                // Simulate AI response for now
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
-                const botResponse = `I'm a placeholder AI. You asked: "${userMessage}". I can help with information about the forum, articles, and events.`;
-                
-                loadingDiv.remove(); // Remove loading indicator
-                appendMessage('bot', botResponse);
-
-            } catch (error) {
-                console.error('Error fetching chatbot response:', error);
-                loadingDiv.remove();
-                appendMessage('bot', 'Sorry, I am having trouble connecting right now. Please try again later.');
-            }
-        }
-
-        sendButton.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Function to get CSRF token (needed for Django POST requests)
+        // Get CSRF token from cookies
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -133,6 +92,76 @@
             }
             return cookieValue;
         }
+
+        async function sendMessage() {
+            const userMessage = chatInput.value.trim();
+            if (!userMessage) return;
+
+            // Display user message immediately
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            appendMessage('user', userMessage, timeString);
+            chatInput.value = ''; // Clear input
+
+            // Add thinking indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('flex', 'justify-start', 'thinking-indicator');
+            loadingDiv.innerHTML = `
+                <div class="bg-gray-200 text-dark-text p-4 rounded-xl rounded-bl-none max-w-[70%] shadow-sm">
+                    <i class="fas fa-spinner fa-spin mr-2"></i> Thinking...
+                </div>
+            `;
+            chatHistory.appendChild(loadingDiv);
+            scrollToBottom();
+
+            try {
+                const formData = new FormData();
+                formData.append('message', userMessage);
+
+                const response = await fetch("{% url 'chatbot_api' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest', // Important for Django's is_ajax()
+                    },
+                    body: formData
+                });
+
+                // Remove loading indicator
+                loadingDiv.remove();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Display bot response
+                const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                appendMessage('bot', data.response, botTime);
+
+            } catch (error) {
+                console.error('Error fetching chatbot response:', error);
+                // Remove loading indicator if present due to error
+                if (loadingDiv.parentNode) {
+                    loadingDiv.remove();
+                }
+                const errorTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                appendMessage('bot', "Sorry, I encountered an error. Please try again or contact support via the Contact Us page.", errorTime);
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { // Allow Shift+Enter for new lines
+                e.preventDefault(); // Prevent default Enter behavior (e.g., new line)
+                sendMessage();
+            }
+        });
+
+        // Initial scroll to bottom when page loads
+        scrollToBottom();
     });
 </script>
+{% endif %}
 {% endblock %}

@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser # For custom user model if needed, or use default User
 from django.utils import timezone
+from django.utils.text import slugify # Import slugify
+from django.db.models.signals import pre_save # Import pre_save signal
+from django.dispatch import receiver # Import receiver decorator
 
 class User(AbstractUser):
 
@@ -48,12 +51,14 @@ class Event(models.Model):
 class Article(models.Model):
     """
     Represents a blog post or article.
+    Added 'slug' field for clean URLs.
     """
     title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True) # TEMPORARILY ADD null=True
     content = models.TextField()
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='articles')
     featured_image = models.ImageField(upload_to='articles/', blank=True, null=True)
-    image = models.ImageField(upload_to='articles/', blank=True, null=True)
+    image = models.ImageField(upload_to='articles/', blank=True, null=True) # This seems duplicate with featured_image, consider removing one.
     category = models.CharField(
         max_length=50,
         choices=[
@@ -66,13 +71,13 @@ class Article(models.Model):
         default='general'
     )
     tags = models.CharField(max_length=255, blank=True, help_text="Comma-separated tags (e.g., policy, governance)")
-    is_published = models.BooleanField(default=False) # For moderation queue
+    is_published = models.BooleanField(default=False)
     published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-published_at', '-created_at'] # Latest articles first
+        ordering = ['-published_at', '-created_at']
 
     def save(self, *args, **kwargs):
         if self.is_published and not self.published_at:
@@ -81,6 +86,19 @@ class Article(models.Model):
 
     def __str__(self):
         return f"{self.title} | {self.author}"
+
+# Signal to auto-generate slug for Article
+@receiver(pre_save, sender=Article)
+def generate_article_slug(sender, instance, *args, **kwargs):
+    if not instance.slug: # Only generate if slug is not already set
+        base_slug = slugify(instance.title)
+        # Ensure slug is unique, append a number if necessary
+        unique_slug = base_slug
+        num = 1
+        while Article.objects.filter(slug=unique_slug).exists():
+            unique_slug = f"{base_slug}-{num}"
+            num += 1
+        instance.slug = unique_slug
 
 class ArticleComment(models.Model):
     """

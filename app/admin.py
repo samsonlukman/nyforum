@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import User, Event, Article, ArticleComment, ForumThread, ThreadReply, ThreadReplyLike
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin # Import base UserAdmin
 from django.utils import timezone # Import timezone for actions
+from .forms import ArticleForm
 
 # Customize the default UserAdmin to display the new profile_pics field
 class CustomUserAdmin(BaseUserAdmin):
@@ -21,12 +22,15 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'is_published', 'published_at', 'created_at')
+    form = ArticleForm # Tell admin to use your custom form
+    list_display = ('title', 'slug', 'author', 'is_published', 'published_at', 'created_at')
     list_filter = ('is_published', 'category', 'author')
     search_fields = ('title', 'content', 'tags')
-    raw_id_fields = ('author',) # For large user bases
+    raw_id_fields = ('author',) # This is good for ForeignKey to User for better UI
     date_hierarchy = 'published_at'
     actions = ['make_published', 'make_unpublished']
+    # Removed prepopulated_fields and readonly_fields for slug
+    # as widget in ArticleForm makes it readonly and slugify signal handles auto-generation.
 
     def make_published(self, request, queryset):
         queryset.update(is_published=True, published_at=timezone.now())

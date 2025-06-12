@@ -27,11 +27,11 @@ def home_view(request):
 
     # Fetch latest forum threads (order by most recent activity)
     # This might require more complex queries in a real app to get "trending"
+    latest_articles = Article.objects.filter(is_published=True).order_by('-published_at')[:3]
     latest_forum_threads = ForumThread.objects.annotate(
         num_replies=Count('replies')
     ).order_by('-updated_at')[:3]
 
-    # Fetch upcoming events
     upcoming_events = Event.objects.filter(date_time__gte=timezone.now()).order_by('date_time')[:2]
 
     # Placeholder for candidate (assuming one candidate for now)
@@ -163,10 +163,6 @@ def forum_detail_view(request, thread_id):
     return render(request, 'app/forum_detail.html', context)
 
 def article_list_view(request):
-    """
-    Displays a list of articles.
-    Includes search and category/tag filtering.
-    """
     articles = Article.objects.filter(is_published=True).order_by('-published_at')
     query = request.GET.get('q')
     category = request.GET.get('category')
@@ -177,7 +173,7 @@ def article_list_view(request):
     if category and category != 'all':
         articles = articles.filter(category=category)
     if tag:
-        articles = articles.filter(tags__icontains=tag) # Simple tag search
+        articles = articles.filter(tags__icontains=tag)
 
     context = {
         'articles': articles,
@@ -185,17 +181,16 @@ def article_list_view(request):
         'current_category': category,
         'current_tag': tag,
         'categories': Article.category.field.choices,
-        # You might fetch a list of all unique tags here for the filter dropdown
-        # 'tags': Article.objects.values_list('tags', flat=True).distinct()
     }
     return render(request, 'app/article_list.html', context)
 
-def article_detail_view(request, article_id):
+# Changed from article_id to slug
+def article_detail_view(request, slug):
     """
-    Displays a single article and its comments.
+    Displays a single article and its comments based on slug.
     Allows authenticated users to post comments.
     """
-    article = get_object_or_404(Article, id=article_id, is_published=True)
+    article = get_object_or_404(Article, slug=slug, is_published=True) # Fetch by slug
     comments = article.comments.filter(is_approved=True).order_by('created_at')
 
     if request.method == 'POST':
@@ -205,8 +200,8 @@ def article_detail_view(request, article_id):
             new_comment.article = article
             new_comment.author = request.user
             new_comment.save()
-            messages.success(request, 'Comment posted!')
-            return redirect('article_detail', article_id=article.id)
+            messages.success(request, 'Your comment has been submitted for review.')
+            return redirect('article_detail', slug=article.slug) # Redirect with slug
         else:
             messages.error(request, 'Failed to post comment. Please correct the errors.')
     else:
@@ -271,9 +266,61 @@ def write_post_view(request):
 
 def chatbot_view(request):
     """
-    Chatbot page view. This is a placeholder for actual AI integration.
+    Renders the chatbot page. Chat history is managed client-side.
     """
-    return render(request, 'app/chatbot.html')
+    # Pass forum contact email to the frontend for hand-off response
+    context = {
+        'forum_contact_email': settings.FORUM_CONTACT_EMAIL
+    }
+    return render(request, 'app/chatbot.html', context)
+
+
+# Simplified chatbot_api_view - rule-based, no Deepseek
+def chatbot_api_view(request):
+    """
+    Handles AJAX requests for chatbot messages with a simple rule-based system.
+    No Deepseek API or database persistence.
+    """
+    if request.method == 'POST':
+        if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Must be an AJAX request'}, status=400)
+
+        user_message_content = request.POST.get('message', '').strip().lower() # Process message in lowercase
+
+        if not user_message_content:
+            return JsonResponse({'error': 'Message cannot be empty'}, status=400)
+        
+        bot_response_content = "I'm sorry, I don't understand that. Please ask a question related to the forum, articles, events, or general youth topics."
+
+        # Rule-based responses
+        if "hello" in user_message_content or "hi" in user_message_content:
+            bot_response_content = "Hello! Welcome to the Nigerian Youth Forum. How can I help you today?"
+        elif "about us" in user_message_content or "what is this forum" in user_message_content:
+            bot_response_content = "The Nigerian Youth Forum is dedicated to empowering young Nigerians for national development. We provide a platform for discussions, articles, and events related to youth empowerment, politics, and community building."
+        elif "faq" in user_message_content or "questions" in user_message_content:
+            bot_response_content = "You can find answers to common questions on our <a href='/faq/' class='text-blue-600 hover:underline'>FAQ page</a>."
+        elif "contact" in user_message_content or "reach out" in user_message_content:
+            bot_response_content = f"You can reach us through our <a href='/contact/' class='text-blue-600 hover:underline'>Contact Us page</a>, or email us at {settings.FORUM_CONTACT_EMAIL}."
+        elif "events" in user_message_content or "upcoming activities" in user_message_content:
+            bot_response_content = "Check out our <a href='/events/' class='text-blue-600 hover:underline'>Events page</a> for upcoming webinars, town halls, and workshops."
+        elif "blog" in user_message_content or "articles" in user_message_content:
+            bot_response_content = "Our <a href='/blog/' class='text-blue-600 hover:underline'>Blog/Articles section</a> features insightful content on leadership, elections, economy, and more."
+        elif "forum" in user_message_content or "discussions" in user_message_content:
+            bot_response_content = "Visit our <a href='/forum/' class='text-blue-600 hover:underline'>Forum page</a> to join discussions on various topics like politics, youth empowerment, and announcements."
+        elif "register" in user_message_content or "sign up" in user_message_content:
+            bot_response_content = "You can register for an account on our <a href='/register/' class='text-blue-600 hover:underline'>Registration page</a> to become a member."
+        elif "login" in user_message_content or "sign in" in user_message_content:
+            bot_response_content = "You can log into your account on our <a href='/login/' class='text-blue-600 hover:underline'>Login page</a>."
+        elif "olajide filani" in user_message_content or "presidential candidate" in user_message_content:
+            bot_response_content = "Olajide Filani is our aspiring presidential candidate. You can read his full biography on his <a href='/candidate/olajide-filani/' class='text-blue-600 hover:underline'>Candidate Bio page</a>."
+        elif "donate" in user_message_content or "support" in user_message_content or "contribute" in user_message_content:
+            bot_response_content = "You can support our work by making a donation on our <a href='/donate/' class='text-blue-600 hover:underline'>Donate page</a>. Your contributions help us continue our mission."
+        elif any(keyword in user_message_content for keyword in ['speak to human', 'talk to human', 'human support', 'agent', 'live chat', 'talk to someone', 'helpdesk']):
+            bot_response_content = f"I understand you'd like to speak to a human. Please send an email directly to our support team at <a href='mailto:{settings.FORUM_CONTACT_EMAIL}' class='text-blue-600 hover:underline font-semibold'>{settings.FORUM_CONTACT_EMAIL}</a>. They will respond as soon as possible."
+        
+        return JsonResponse({'response': bot_response_content})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def contact_view(request):
     """

@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-b_y1w(tdk%fqzydr871*+v14n8s$x!b1^62w+@gqyfze=^(4$c'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['nyf.pythonanywhere.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -129,3 +129,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Or your SMTP backend
+# EMAIL_HOST = 'smtp.example.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = 'no-reply@yourforum.com' # Replace with your sender email
+SERVER_EMAIL = DEFAULT_FROM_EMAIL # Email for error reports
+
+# Define the forum's general contact email for the chatbot handoff
+FORUM_CONTACT_EMAIL = "info@nigerianyouthforum.org" # Make sure this is a real email

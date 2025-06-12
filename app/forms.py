@@ -93,12 +93,16 @@ class UserProfileUpdateForm(forms.ModelForm):
 class ArticleForm(forms.ModelForm):
     """
     Form for creating/editing articles.
+    Now includes 'slug' field.
     """
     class Meta:
         model = Article
-        fields = ['title', 'content', 'featured_image', 'category', 'tags', 'is_published']
+        # Add 'author' to the fields list so it appears in the form
+        fields = ['title', 'slug', 'author', 'content', 'featured_image', 'category', 'tags', 'is_published']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-green transition-colors', 'placeholder': 'Enter your article title here'}),
+            'slug': forms.TextInput(attrs={'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed', 'readonly': 'readonly'}),
+            'author': forms.Select(attrs={'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-green transition-colors bg-white'}), # Add widget for author
             'content': forms.Textarea(attrs={'class': 'w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-green transition-colors min-h-[300px]', 'placeholder': 'Write your article content here. You can use Markdown or basic HTML...'}),
             'category': forms.Select(attrs={'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-green transition-colors bg-white'}),
             'tags': forms.TextInput(attrs={'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-green transition-colors', 'placeholder': 'e.g., Elections, Leadership, Policy'}),

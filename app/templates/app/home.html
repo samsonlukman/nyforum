@@ -1,6 +1,6 @@
 {% extends 'app/layout.html' %}
 
-{% block title %}Home - Nigerian Youth Forum{% endblock %}
+{% block title %}Home - Unified Nigerian Youth Forum{% endblock %}
 
 {% block content %}
     <!-- Hero Section -->
@@ -43,15 +43,21 @@
             {% for article in latest_articles %}
             <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
                 {% if article.featured_image %}
+                 <a href="{% url 'article_detail' slug=article.slug %}">
                     <img src="{{ article.featured_image.url }}" alt="{{ article.title }} Thumbnail" class="w-full h-48 object-cover">
-                {% else %}
+                 </a>
+                    {% else %}
+                     <a href="{% url 'article_detail' slug=article.slug %}">
                     <img src="https://placehold.co/600x400/36A13B/FFFFFF?text={{ article.title|truncatechars:15 }}" alt="Placeholder" class="w-full h-48 object-cover">
-                {% endif %}
+                     </a>
+                    {% endif %}
                 <div class="p-6">
+                     <a href="{% url 'article_detail' slug=article.slug %}">
                     <h3 class="text-xl font-bold text-dark-text mb-2">{{ article.title }}</h3>
                     <p class="text-gray-600 text-sm mb-4">By {{ article.author.get_full_name|default:article.author.username }} | {{ article.published_at|date:"M d, Y" }}</p>
                     <p class="text-gray-700 leading-relaxed mb-4">{{ article.content|truncatechars:100 }}</p>
-                    <a href="{% url 'article_detail' article_id=article.id %}" class="text-secondary-green font-semibold hover:underline">Read More</a>
+                    </a>
+                   <a href="{% url 'article_detail' slug=article.slug %}" class="bg-white text-primary-green px-10 py-4 rounded-full text-xl font-bold hover:bg-gray-200 transition-colors shadow-lg">Read More</a>
                 </div>
             </div>
             {% empty %}
