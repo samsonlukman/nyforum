@@ -29,7 +29,7 @@
                         <input type="checkbox" id="remember-me" name="remember_me" class="h-5 w-5 text-primary-green rounded-md focus:ring-primary-green mr-2" style="color: var(--primary-green);">
                         <label for="remember-me" class="text-gray-700">Remember Me</label>
                     </div>
-                    <a href="#" class="text-secondary-green hover:underline">Forgot Password?</a>
+                     <a href="{% url 'password_reset' %}" class="text-secondary-green hover:underline">Forgot Password?</a>
                 </div>
                 <button type="submit" class="w-full bg-primary-green text-white py-3 rounded-lg text-lg font-bold hover:bg-secondary-green transition-colors shadow-md">Login</button>
             </form>
