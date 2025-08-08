@@ -1,0 +1,76 @@
+{% extends 'app/layout.html' %}
+{% block title %}{{ event.title }} - PDF Viewer{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold mb-4 text-center text-primary-green">{{ event.title }}</h2>
+    <p class="text-center mb-8 text-gray-600">Swipe through PDF or use navigation buttons</p>
+
+    <div id="pdf-controls" class="flex justify-center items-center mb-4 gap-4">
+        <button onclick="prevPage()" class="bg-gray-300 px-4 py-2 rounded">Previous</button>
+        <span>Page <span id="page_num">1</span> of <span id="page_count">--</span></span>
+        <button onclick="nextPage()" class="bg-gray-300 px-4 py-2 rounded">Next</button>
+    </div>
+
+    <canvas id="pdf-render" class="mx-auto border shadow-lg"></canvas>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+    const url = "{{ event.pdf_file.url }}";
+    let pdfDoc = null, pageNum = 1, pageRendering = false, pageNumPending = null;
+    const scale = 1.5;
+    const canvas = document.getElementById('pdf-render');
+    const ctx = canvas.getContext('2d');
+
+    pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        document.getElementById('page_count').textContent = pdfDoc.numPages;
+        renderPage(pageNum);
+    });
+
+    function renderPage(num) {
+        pageRendering = true;
+        pdfDoc.getPage(num).then(function (page) {
+            const viewport = page.getViewport({ scale: scale });
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            const renderTask = page.render(renderContext);
+
+            renderTask.promise.then(function () {
+                pageRendering = false;
+                document.getElementById('page_num').textContent = pageNum;
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+    }
+
+    function queueRenderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+
+    function nextPage() {
+        if (pageNum >= pdfDoc.numPages) return;
+        pageNum++;
+        queueRenderPage(pageNum);
+    }
+
+    function prevPage() {
+        if (pageNum <= 1) return;
+        pageNum--;
+        queueRenderPage(pageNum);
+    }
+</script>
+{% endblock %}

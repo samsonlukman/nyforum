@@ -55,6 +55,10 @@ def olajide_filani(request):
 def donate(request):
     return render(request, "app/donate.html")
 
+def view_event_pdf(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    return render(request, 'app/view_event_pdf.html', {'event': event})
+
 def faq(request):
     return render(request, "app/faq.html")
 

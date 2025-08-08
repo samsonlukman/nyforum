@@ -18,13 +18,10 @@ class User(AbstractUser):
 
 
 class Event(models.Model):
-    """
-    Represents an upcoming youth political event, webinar, or town hall.
-    """
     title = models.CharField(max_length=255)
     description = models.TextField()
     date_time = models.DateTimeField()
-    location = models.CharField(max_length=255) # E.g., "Online Webinar (Zoom)", "Abuja Conference Center"
+    location = models.CharField(max_length=255)
     category = models.CharField(
         max_length=50,
         choices=[
@@ -39,14 +36,16 @@ class Event(models.Model):
     image = models.ImageField(upload_to='events/', blank=True, null=True)
     organizer = models.CharField(max_length=100, blank=True, null=True)
     registration_link = models.URLField(max_length=500, blank=True, null=True)
+    pdf_file = models.FileField(upload_to='event_pdfs/', blank=True, null=True)  # New field
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['date_time'] # Order events by date and time
+        ordering = ['date_time']
 
     def __str__(self):
         return self.title
+
 
 class Article(models.Model):
     """
