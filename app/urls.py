@@ -7,8 +7,8 @@ urlpatterns = [
     path('olajide-filani/', views.olajide_filani, name='olajide_filani'),
     path('donate/', views.donate, name='donate'),
     path('register/', views.register_view, name='register'),
-    path('login/', views.UserLoginView.as_view(), name='login'),
-    path("logout/", views.logout_view, name="logout"),
+    path('accounts/login/', views.UserLoginView.as_view(), name='login'),
+    path("accounts/logout/", views.logout_view, name="logout"),
 
     path('forum/', views.forum_list_view, name='forum_list'),
     path('forum/<int:thread_id>/', views.forum_detail_view, name='forum_detail'),
