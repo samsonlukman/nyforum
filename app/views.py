@@ -10,6 +10,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 
+
 from .models import User, Event, Article, ArticleComment, ForumThread, ThreadReply, ThreadReplyLike # Added Candidate model
 from .forms import (
     UserRegistrationForm, UserLoginForm, UserProfileUpdateForm,
@@ -139,7 +140,7 @@ def forum_detail_view(request, thread_id):
     """
     thread = get_object_or_404(ForumThread, id=thread_id)
     replies = thread.replies.all() # Fetch all replies for the thread
-    
+
     initial_data = {}
     if request.method == 'POST':
         # Check if the post is a reply submission
@@ -155,7 +156,7 @@ def forum_detail_view(request, thread_id):
             else:
                 messages.error(request, 'Failed to post reply. Please check your input.')
         # If it's a like/unlike action, it will be handled by the AJAX view
-    
+
     # Initialize forms for GET request or if POST failed
     reply_form = ThreadReplyForm(initial=initial_data)
 
@@ -188,14 +189,17 @@ def article_list_view(request):
     }
     return render(request, 'app/article_list.html', context)
 
-# Changed from article_id to slug
+
 def article_detail_view(request, slug):
     """
     Displays a single article and its comments based on slug.
     Allows authenticated users to post comments.
     """
-    article = get_object_or_404(Article, slug=slug, is_published=True) # Fetch by slug
+    article = get_object_or_404(Article, slug=slug, is_published=True)
     comments = article.comments.filter(is_approved=True).order_by('created_at')
+
+    # ✅ Build absolute URL for the featured image
+    full_image_url = request.build_absolute_uri(article.featured_image.url) if article.featured_image else None
 
     if request.method == 'POST':
         comment_form = ArticleCommentForm(request.POST)
@@ -205,7 +209,7 @@ def article_detail_view(request, slug):
             new_comment.author = request.user
             new_comment.save()
             messages.success(request, 'Your comment has been submitted for review.')
-            return redirect('article_detail', slug=article.slug) # Redirect with slug
+            return redirect('article_detail', slug=article.slug)
         else:
             messages.error(request, 'Failed to post comment. Please correct the errors.')
     else:
@@ -215,8 +219,10 @@ def article_detail_view(request, slug):
         'article': article,
         'comments': comments,
         'comment_form': comment_form,
+        'full_image_url': full_image_url,  # ✅ Add this
     }
     return render(request, 'app/article_detail.html', context)
+
 
 @login_required
 def write_post_view(request):
@@ -293,7 +299,7 @@ def chatbot_api_view(request):
 
         if not user_message_content:
             return JsonResponse({'error': 'Message cannot be empty'}, status=400)
-        
+
         bot_response_content = "I'm sorry, I don't understand that. Please ask a question related to the forum, articles, events, or general youth topics."
 
         # Rule-based responses
@@ -321,7 +327,7 @@ def chatbot_api_view(request):
             bot_response_content = "You can support our work by making a donation on our <a href='/donate/' class='text-blue-600 hover:underline'>Donate page</a>. Your contributions help us continue our mission."
         elif any(keyword in user_message_content for keyword in ['speak to human', 'talk to human', 'human support', 'agent', 'live chat', 'talk to someone', 'helpdesk']):
             bot_response_content = f"I understand you'd like to speak to a human. Please send an email directly to our support team at <a href='mailto:{settings.FORUM_CONTACT_EMAIL}' class='text-blue-600 hover:underline font-semibold'>{settings.FORUM_CONTACT_EMAIL}</a>. They will respond as soon as possible."
-        
+
         return JsonResponse({'response': bot_response_content})
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
