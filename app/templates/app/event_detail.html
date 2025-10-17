@@ -1,0 +1,40 @@
+{% extends 'app/layout.html' %}
+
+{% block title %}{{ event.title }} - Event Details{% endblock %}
+
+{% block og_title %}{{ event.title }}{% endblock %}
+{% block og_description %}{{ event.description|striptags|truncatewords:25 }}{% endblock %}
+{% block og_image %}{{ full_image_url }}{% endblock %}
+{% block twitter_title %}{{ event.title }}{% endblock %}
+{% block twitter_description %}{{ event.description|striptags|truncatewords:25 }}{% endblock %}
+{% block twitter_image %}{{ full_image_url }}{% endblock %}
+{% block og_type %}event{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16 max-w-4xl">
+  <div class="bg-white rounded-xl shadow-lg p-8 md:p-12">
+    {% if event.image %}
+      <img src="{{ event.image.url }}" alt="{{ event.title }} image" class="w-full h-auto rounded-lg mb-8 object-cover max-h-96">
+    {% endif %}
+
+    <h1 class="text-4xl font-extrabold text-dark-text mb-4">{{ event.title }}</h1>
+    <p class="text-gray-600 mb-3"><i class="fas fa-calendar mr-2 text-secondary-green"></i>{{ event.date_time|date:"M d, Y" }} at {{ event.date_time|time:"h:i A" }}</p>
+    <p class="text-gray-600 mb-3"><i class="fas fa-map-marker-alt mr-2 text-secondary-green"></i>{{ event.location }}</p>
+    {% if event.organizer %}
+      <p class="text-gray-600 mb-6"><i class="fas fa-user-tie mr-2 text-secondary-green"></i>{{ event.organizer }}</p>
+    {% endif %}
+
+    <div class="prose max-w-none text-gray-800 leading-relaxed text-lg mb-8">
+      {{ event.description|linebreaksbr }}
+    </div>
+
+    {% if event.pdf_file %}
+      <a href="{% url 'view_event_pdf' event.id %}" class="block mb-4 text-primary-green hover:underline font-semibold">📄 View PDF Guide</a>
+    {% endif %}
+
+    {% if event.registration_link %}
+      <a href="{{ event.registration_link }}" target="_blank" class="block bg-primary-green text-white px-6 py-3 rounded-full hover:bg-secondary-green transition-colors font-medium text-center">Register Now</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

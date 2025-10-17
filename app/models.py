@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.text import slugify # Import slugify
 from django.db.models.signals import pre_save # Import pre_save signal
 from django.dispatch import receiver # Import receiver decorator
+from django.urls import reverse
 
 class User(AbstractUser):
 
@@ -19,6 +20,7 @@ class User(AbstractUser):
 
 class Event(models.Model):
     title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, blank=True)
     description = models.TextField()
     date_time = models.DateTimeField()
     location = models.CharField(max_length=255)
@@ -36,15 +38,23 @@ class Event(models.Model):
     image = models.ImageField(upload_to='events/', blank=True, null=True)
     organizer = models.CharField(max_length=100, blank=True, null=True)
     registration_link = models.URLField(max_length=500, blank=True, null=True)
-    pdf_file = models.FileField(upload_to='event_pdfs/', blank=True, null=True)  # New field
+    pdf_file = models.FileField(upload_to='event_pdfs/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['date_time']
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('event_detail', args=[self.id, self.slug])
 
 
 class Article(models.Model):

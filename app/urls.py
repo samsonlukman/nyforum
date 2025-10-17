@@ -23,7 +23,8 @@ urlpatterns = [
     path('api/chatbot/', views.chatbot_api_view, name='chatbot_api'), 
     path('contact/', views.contact_view, name='contact'),
     path('events/', views.events_view, name='events'),
-     path('event/<int:event_id>/', views.view_event_pdf, name='view_event_pdf'),
+    path('event/<int:event_id>/', views.view_event_pdf, name='view_event_pdf'),
+    path('events/<int:id>/<slug:slug>/', views.event_detail_view, name='event_detail'),
 
     path('faq/', views.faq, name='faq'),
     path('terms-of-service/', views.terms_of_service, name='terms'),

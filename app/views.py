@@ -60,6 +60,16 @@ def view_event_pdf(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     return render(request, 'app/view_event_pdf.html', {'event': event})
 
+def event_detail_view(request, id, slug):
+    event = get_object_or_404(Event, id=id)
+    full_image_url = request.build_absolute_uri(event.image.url) if event.image else request.build_absolute_uri('/static/img/default-og.jpg')
+
+    context = {
+        'event': event,
+        'full_image_url': full_image_url,
+    }
+    return render(request, 'app/event_detail.html', context)
+
 def faq(request):
     return render(request, "app/faq.html")
 
